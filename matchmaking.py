@@ -9,17 +9,21 @@ class Player:
         self.dps_elo = dps
         self.supp_elo = supp
         self.num_roles = math.ceil(tank/5000) + math.ceil(tank/5000) + math.ceil(tank/5000)
+        self.allowed_roles = None
         return
 
     def get_allowed_roles(self) -> list:
-        ret = [0,0,0]
+        if self.allowed_roles:
+            return self.allowed_roles
+
+        self.allowed_roles = [0,0,0]
         if self.tank_elo:
-            ret[0] = 1
+            self.allowed_roles[0] = 1
         if self.dps_elo:
-            ret[1] = 1
+            self.allowed_roles[1] = 1
         if self.supp_elo:
-            supp[1] = 1
-        return ret
+            self.allowed_roles[2] = 1
+        return self.allowed_roles
 
     def get_mmr(self, role):
         if role == 0:
@@ -35,6 +39,7 @@ class Player:
     def get_name(self):
         return self.name
 
+
 class Team:
     def __init__(self) -> None:
         self.tank_slots = 2
@@ -43,49 +48,44 @@ class Team:
         self.players = [None]*6
         return
     
-    def get_slots(self) -> list:
-        return [tank_slots, dps_slots, supp_slots]
-    
-    def get_avg_mmr(self):
+    def get_avg_mmr_high(self):
         sum = 0
         for i in self.players:
             sum += i.get_highest_mmr()
         return sum//6
-    
+
+    def get_avg_mmr_role(self):
+        sum = 0
+        for i in range(len(self.players)):
+            break
+
     def fill_players(self, arr):
         self.players = arr
 
+    def slot_player(self, player, arr):
+        pass
+
+
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, members) -> None:
         self.team1 = Team()
         self.team2 = Team()
         self.players = [] 
-        
-    def matchmaking(self, members):
-        ones = []
-        twos = []
-        threes = []
-
-    def matchmaking_combo(self, members):
         for i,j in members.items():
             self.players.append(Player(i,j[0],j[1],j[2]))
-        
+
+    def matchmaking_combo(self):
         count_ok = 0
         max_gap = 0
         min_gap = 5000
         pool = list(itertools.combinations(self.players,6))
+        reasonable = []
         for i in range(len(pool)//2):
-            for j in pool[i]:
-                print(j.get_name(), end=" ")
-            print(',', end=" ")
-            for j in pool[-(i+1)]:
-                print(j.get_name(), end=" ")
-            print()
             self.team1.fill_players(pool[i])
             self.team2.fill_players(pool[-(i+1)])
-            a = self.team1.get_avg_mmr()
-            b = self.team2.get_avg_mmr()
+            a = self.team1.get_avg_mmr_high()
+            b = self.team2.get_avg_mmr_high()
             diff = abs(a - b)
             if diff < min_gap:
                 min_gap = diff
@@ -93,40 +93,59 @@ class Game:
                 max_gap = diff
             if diff < 200:
                 count_ok += 1
-        print(count_ok, max_gap, min_gap)
+                reasonable.append((pool[i], pool[-(i+1)]))
+        return reasonable
 
+    def matchmaking(self):
+        self.players.sort(key=lambda player: sum(player.get_allowed_roles()))
+        for i in self.players:
+            roles = i.get_allowed_roles()
+            team1_mmr = self.team1.get_avg_mmr_role
+            team2_mmr = self.team2.get_avg_mmr_role
 
-        
+            if sum(roles) == 1:
+                break
 
-        
+            elif sum(roles) == 2:
+                break
+            else:
+                break
 
-            
-
-
-
-"""
-Add sr numbers to each slot in the dictionary. You can use the comment strings to indicate which user is which.
-"""
-members = {
-
-            1 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            2 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            3 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            4 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            5 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            6 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            7 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            8 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            9 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            10 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            11 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)],
-            12 : [random.randint(1300,4000),random.randint(1300,4000),random.randint(1300,4000)]
-        }
 
 def main():
-    game = Game()
-    game.matchmaking_combo(members)
+    """
+    Extras:
+    "Kyanite" : [2200, 2400, 2300]
+    "MeloStan" : [3100, 0, 0]
+    "DemonWolf" : [1700, 1600, 0]
+    
+    """
+    members = {
+            "Kazumi" : [0, 0, 1700],
+            "MaleABG": [2000, 1300, 1600],
+            "Greasybacon": [2100, 1600, 2300],
+            "Stark": [2300, 2000, 1900],
+            "Tastypork": [1800, 2300, 1700],
+            "Dark" : [3200, 3100, 3600],
+            "Sinyx" : [0, 3100, 0],
+            "Vaykyll" : [2800, 0, 2900],
+            "Shivers": [0, 0, 2700],
+            "Zen" : [0, 3550, 3400],
+            "Socd" : [2200, 0, 0],
+            "Hanzbro" : [1700, 1800, 1700]
+        }
+    
+    game = Game(members)
+    mom = game.matchmaking_combo()
+
+    rand = random.randint(0, len(mom))
+    
+    for i in mom[rand]:
+        print("Team:")
+        for j in i:
+            print(j.get_name())
+        print()
+        print()
     
 if __name__ == "__main__":
     main()
-
