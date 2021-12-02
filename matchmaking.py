@@ -91,9 +91,10 @@ class Game:
                 min_gap = diff
             if diff > max_gap:
                 max_gap = diff
-            if diff < 200:
+            if diff < 100:
                 count_ok += 1
                 reasonable.append((pool[i], pool[-(i+1)]))
+        print("\nReasonable combonations found: " + str(count_ok) + "\n")
         return reasonable
 
     def matchmaking(self):
@@ -118,21 +119,24 @@ def main():
     "Kyanite" : [2200, 2400, 2300]
     "MeloStan" : [3100, 0, 0]
     "DemonWolf" : [1700, 1600, 0]
+    "Greasybacon": [2100, 1600, 2300]
+    "Stark": [2300, 2000, 1900]
+    "Kazumi" : [0, 0, 1700]
     
     """
     members = {
-            "Kazumi" : [0, 0, 1700],
+            "Lego": [1600, 1800, 2400],
             "MaleABG": [2000, 1300, 1600],
-            "Greasybacon": [2100, 1600, 2300],
-            "Stark": [2300, 2000, 1900],
+            "shamaku": [2900, 3000, 2900],
+            "monke": [2600, 0, 0],
             "Tastypork": [1800, 2300, 1700],
             "Dark" : [3200, 3100, 3600],
             "Sinyx" : [0, 3100, 0],
-            "Vaykyll" : [2800, 0, 2900],
-            "Shivers": [0, 0, 2700],
-            "Zen" : [0, 3550, 3400],
-            "Socd" : [2200, 0, 0],
-            "Hanzbro" : [1700, 1800, 1700]
+            "Vaykyll" : [2000, 0, 2246],
+            "Shivers": [1815, 1340, 2344],
+            "Zen" : [3200, 3550, 3400],
+            "Socd" : [2700, 0, 0],
+            "Hanzbro" : [1700, 1300, 1400]
         }
     
     game = Game(members)
@@ -141,10 +145,13 @@ def main():
     rand = random.randint(0, len(mom))
     
     for i in mom[rand]:
+        sum = 0
         print("Team:")
         for j in i:
             print(j.get_name())
-        print()
+            sum += j.get_highest_mmr()
+        
+        print(sum//6)
         print()
     
 if __name__ == "__main__":
